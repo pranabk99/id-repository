@@ -161,6 +161,7 @@ public class IdRepoServiceHelper {
                                     String handle = ((String) identityMap.get(handleFieldId))
                                             .concat(getHandlePostfix(handleFieldId))
                                             .toLowerCase(Locale.ROOT);
+                                    System.out.println("Raw handle value: "+ handle);
                                     return new HandleDto(handle, getHandleHash(handle));
                                 }));
             }

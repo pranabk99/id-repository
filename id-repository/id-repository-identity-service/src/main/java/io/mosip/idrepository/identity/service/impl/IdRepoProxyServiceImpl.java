@@ -763,6 +763,7 @@ public class IdRepoProxyServiceImpl implements IdRepoService<IdRequestDTO, IdRes
 			throws IdRepoAppException {
 		try {
 			String handleHash = idRepoServiceHelper.getHandleHash(handle);
+			System.out.println("handle hash value for retrive identity: "+handleHash);
 			Handle entity = handleRepo.findByHandleHash(handleHash);
 			if (Objects.nonNull(entity)) {
 				return retrieveIdentityByUinHash(type, entity.getUinHash(), extractionFormats);
