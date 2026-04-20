@@ -433,11 +433,20 @@ public class IdRepoServiceImpl implements IdRepoService<IdRequestDTO, Uin> {
 						.mappingProvider(new JacksonMappingProvider()).build();
 				DocumentContext inputData = JsonPath.using(configuration).parse(requestDTO.getIdentity());
 				DocumentContext dbData = JsonPath.using(configuration).parse(new String(uinObject.getUinData()));
+
+				System.out.println("raw Input Data:");
+				System.out.println(inputData.jsonString());
+
+				System.out.println("raw DB Data:");
+				System.out.println(dbData.jsonString());
+
 				anonymousProfileHelper.setOldUinData(dbData.jsonString().getBytes());
 				updateVerifiedAttributes(requestDTO, inputData, dbData);
 				replaceConfiguredFieldsOnUpdate(inputData, dbData);
 				JSONCompareResult comparisonResult = JSONCompare.compareJSON(inputData.jsonString(),
 						dbData.jsonString(), JSONCompareMode.LENIENT);
+
+				System.out.println("Comparison Failed: " + comparisonResult.failed());
 
 				if (comparisonResult.failed()) {
 					updateJsonObject(uinHash, inputData, dbData, comparisonResult, true);
@@ -522,6 +531,7 @@ public class IdRepoServiceImpl implements IdRepoService<IdRequestDTO, Uin> {
 			JSONCompareResult comparisonResult, boolean canPersistUpdateCount) throws JSONException, IOException, IdRepoAppException {
 		Entry<String, Map<String, Integer>> updateCountTracker = getUpdateCountTracker(uinHash, dbData);
 		Map<String, Integer> updateCountTrackerMap = updateCountTracker.getValue();
+		System.out.println("Update Count Tracker Map: " + updateCountTrackerMap);
 		Set<String> attribute = new HashSet<>();
 
 		if (comparisonResult.isMissingOnField()) {
@@ -538,6 +548,7 @@ public class IdRepoServiceImpl implements IdRepoService<IdRequestDTO, Uin> {
 			updateMissingValues(inputData, dbData, comparisonResult, attribute);
 		}
 		if(canPersistUpdateCount) {
+			System.out.println("all Attributes to update: " + attribute);
 			updateCount(updateCountTrackerMap, attribute);
 		}
 		comparisonResult = JSONCompare.compareJSON(inputData.jsonString(), dbData.jsonString(), JSONCompareMode.LENIENT);
@@ -545,6 +556,15 @@ public class IdRepoServiceImpl implements IdRepoService<IdRequestDTO, Uin> {
 			// Code should never reach here
 			updateJsonObject(uinHash, inputData, dbData, comparisonResult, true);
 		}
+
+		IdentityUpdateTracker tracker = new IdentityUpdateTracker(
+				updateCountTracker.getKey(),
+				mapper.writeValueAsString(updateCountTrackerMap).getBytes()
+		);
+
+		System.out.println("ID: " + tracker.getId());
+		System.out.println("Identity Update Count: " + new String(tracker.getIdentityUpdateCount()));
+
 		identityUpdateTracker.save(new IdentityUpdateTracker(updateCountTracker.getKey(), CryptoUtil
 				.encodeToURLSafeBase64(mapper.writeValueAsString(updateCountTrackerMap).getBytes()).getBytes()));
 	}
@@ -573,6 +593,7 @@ public class IdRepoServiceImpl implements IdRepoService<IdRequestDTO, Uin> {
 					}
 		}
 		);
+		System.out.println("Attributes Having Limit Exceeded: " + attributesHavingLimitExceeded);
 		if (!attributesHavingLimitExceeded.isEmpty()) {
 			String exceededAttributes = String.join(COMMA, attributesHavingLimitExceeded);
 			mosipLogger.debug("Limit exceeded for attributes: {}", exceededAttributes);
