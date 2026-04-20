@@ -530,6 +530,7 @@ public class IdRepoServiceImpl implements IdRepoService<IdRequestDTO, Uin> {
 	protected void updateJsonObject(String uinHash, DocumentContext inputData, DocumentContext dbData,
 			JSONCompareResult comparisonResult, boolean canPersistUpdateCount) throws JSONException, IOException, IdRepoAppException {
 		Entry<String, Map<String, Integer>> updateCountTracker = getUpdateCountTracker(uinHash, dbData);
+		System.out.println("uin hash value"+uinHash);
 		Map<String, Integer> updateCountTrackerMap = updateCountTracker.getValue();
 		System.out.println("Update Count Tracker Map: " + updateCountTrackerMap);
 		Set<String> attribute = new HashSet<>();
