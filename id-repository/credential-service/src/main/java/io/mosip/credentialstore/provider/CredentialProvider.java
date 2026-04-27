@@ -307,7 +307,7 @@ public class CredentialProvider {
 			Map<String, Object> userReqFormatingAttributes = (Map<String, Object>) additionalData
 					.get(CredentialConstants.FORMATTING_ATTRIBUTES);
 			identityMap = IdentityIssuanceProfileBuilder.getIdentityMapping();
-
+			System.out.println("all demo shareable attributes: "+ sharableAttributeDemographicKeySet);
 			// formatting and masking the data based on request
 			for (AllowedKycDto key : sharableAttributeDemographicKeySet) {
 				String attribute = key.getSource().get(0).getAttribute();
